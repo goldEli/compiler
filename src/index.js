@@ -1,3 +1,14 @@
+const types = {
+  parentheses: "parentheses",
+  number: "number",
+  string: "string",
+  name: "name"
+};
+const nodeTypes = {
+  NumberLiteral: "NumberLiteral",
+  StringLiteral: "StringLiteral",
+  CallExpression: "CallExpression"
+};
 function tokenizer(input) {
   let current = 0;
   let tokens = [];
@@ -7,7 +18,7 @@ function tokenizer(input) {
 
     if (char === "(") {
       tokens.push({
-        type: "parentheses",
+        type: types.parentheses,
         value: char
       });
       ++current;
@@ -16,7 +27,7 @@ function tokenizer(input) {
 
     if (char === ")") {
       tokens.push({
-        type: "parentheses",
+        type: types.parentheses,
         value: char
       });
       ++current;
@@ -38,7 +49,7 @@ function tokenizer(input) {
         ++current;
       }
       tokens.push({
-        type: "number",
+        type: types.number,
         value: char
       });
       continue;
@@ -53,7 +64,7 @@ function tokenizer(input) {
         ++current;
       }
       tokens.push({
-        type: "name",
+        type: types.name,
         value: char
       });
       continue;
@@ -69,7 +80,7 @@ function tokenizer(input) {
         ++current;
       }
       tokens.push({
-        type: "string",
+        type: types.string,
         value: char
       });
       ++current;
@@ -81,7 +92,58 @@ function tokenizer(input) {
   return tokens;
 }
 
-function parser(tokens) {}
+function parser(tokens) {
+  let current = 0;
+
+  function walk() {
+    let token = tokens[current];
+
+    if (token.type === types.number) {
+      return {
+        type: nodeTypes.NumberLiteral,
+        value: token.value
+      };
+    }
+    if (token.type === types.string) {
+      return {
+        type: nodeTypes.StringLiteral,
+        value: token.value
+      };
+    }
+    if (token.type === types.parentheses && token.value === "(") {
+      token = tokens[++current];
+
+      const node = {
+        type: nodeTypes.CallExpression,
+        name: token.value,
+        params: []
+      };
+
+      token = tokens[++current];
+
+      while (
+        token.type !== types.parentheses ||
+        (token.type === types.parentheses && token.value !== ")")
+      ) {
+        node.params.push(walk());
+        token = tokens[++current];
+      }
+
+      return node;
+    }
+  }
+
+  const ast = {
+    type: "Program",
+    body: []
+  };
+
+  while (tokens.length > current) {
+    ast.body.push(walk());
+    ++current;
+  }
+  return ast;
+}
 
 function traverser(ast, visitor) {}
 

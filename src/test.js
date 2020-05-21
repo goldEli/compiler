@@ -6,6 +6,9 @@ const {
   codeGenerator,
   compiler
 } = require("./index");
+const assert = require("assert");
+
+const input = '(add "11" (subtract 44 2))';
 
 const tokens = [
   { type: "parentheses", value: "(" },
@@ -19,11 +22,28 @@ const tokens = [
   { type: "parentheses", value: ")" }
 ];
 
-const assert = require("assert");
-
-const input = '(add "11" (subtract 44 2))';
+const ast = {
+  type: "Program",
+  body: [
+    {
+      type: "CallExpression",
+      name: "add",
+      params: [
+        { type: "StringLiteral", value: "11" },
+        {
+          type: "CallExpression",
+          name: "subtract",
+          params: [
+            { type: "NumberLiteral", value: "44" },
+            { type: "NumberLiteral", value: "2" }
+          ]
+        }
+      ]
+    }
+  ]
+};
 
 assert.deepEqual(tokenizer(input), tokens);
+assert.deepEqual(parser(tokens), ast);
 
-// const tokens = tokenizer(input);
-// console.log(JSON.stringify(tokens));
+// console.log("All Passed!")
