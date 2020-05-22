@@ -5,6 +5,7 @@ const types = {
   name: "name"
 };
 const nodeTypes = {
+  Program: "Program",
   NumberLiteral: "NumberLiteral",
   StringLiteral: "StringLiteral",
   CallExpression: "CallExpression"
@@ -145,7 +146,37 @@ function parser(tokens) {
   return ast;
 }
 
-function traverser(ast, visitor) {}
+function traverser(ast, visitor) {
+  function traverseArray(nodes, parent) {
+    nodes.forEach(node => {
+      traverseNode(node, parent);
+    });
+  }
+
+  function traverseNode(node, parent) {
+    const method = visitor[node.type];
+
+    method && method.enter && method.enter(node, parent);
+
+    switch (node.type) {
+      case nodeTypes.Program:
+        traverseArray(node.body, node);
+        break;
+      case nodeTypes.CallExpression:
+        traverseArray(node.params, node);
+        break;
+      case nodeTypes.StringLiteral:
+      case nodeTypes.NumberLiteral:
+        break;
+      default:
+        throw new TypeError(node.type);
+    }
+
+    method && method.exit && method.exit(node, parent);
+  }
+
+  traverseNode(ast, null);
+}
 
 function transformer(ast) {}
 
