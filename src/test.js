@@ -1,7 +1,6 @@
 const {
   tokenizer,
   parser,
-  traverser,
   transformer,
   codeGenerator,
   compiler
@@ -44,41 +43,32 @@ let ast = {
   ]
 };
 
-const visiter = {
-  Program: {
-    enter(node, parent) {},
-    exit(node, parent) {}
-  },
-  CallExpression: {
-    enter(node, parent) {
-      // ...
-    },
-    exit(node, parent) {
-      // ...
+const newAst = {
+  type: "Program",
+  body: [
+    {
+      type: "ExpressionStatement",
+      expression: {
+        type: "CallExpression",
+        callee: { type: "Identifier", name: "add" },
+        arguments: [
+          { type: "StringLiteral", value: "11" },
+          {
+            type: "CallExpression",
+            callee: { type: "Identifier", name: "subtract" },
+            arguments: [
+              { type: "NumberLiteral", value: "44" },
+              { type: "NumberLiteral", value: "2" }
+            ]
+          }
+        ]
+      }
     }
-  },
-
-  NumberLiteral: {
-    enter(node, parent) {
-      // ...
-    },
-    exit(node, parent) {
-      // ...
-    }
-  },
-  StringLiteral: {
-    enter(node, parent) {
-      node.value = "2222";
-    },
-    exit(node, parent) {}
-  }
+  ]
 };
 
 assert.deepEqual(tokenizer(input), tokens);
 assert.deepEqual(parser(tokens), ast);
-
-traverser(ast, visiter);
-
-console.log(ast.body[0].params[0]);
+assert.deepEqual(transformer(ast), newAst);
 
 // console.log("All Passed!")
