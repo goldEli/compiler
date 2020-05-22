@@ -8,7 +8,8 @@ const {
 const assert = require("assert");
 
 const input = '(add "11" (subtract 44 2))';
-const output = 'add( "11", subtract(44, 2) )';
+
+const output = 'add("11",subtract(44,2));';
 
 const tokens = [
   { type: "parentheses", value: "(" },
@@ -70,5 +71,7 @@ const newAst = {
 assert.deepEqual(tokenizer(input), tokens);
 assert.deepEqual(parser(tokens), ast);
 assert.deepEqual(transformer(ast), newAst);
+assert.deepEqual(codeGenerator(newAst), output);
+assert.deepEqual(compiler(input), output);
 
-// console.log("All Passed!")
+console.log("All Passed!");

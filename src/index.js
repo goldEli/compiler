@@ -8,7 +8,8 @@ const nodeTypes = {
   Program: "Program",
   NumberLiteral: "NumberLiteral",
   StringLiteral: "StringLiteral",
-  CallExpression: "CallExpression"
+  CallExpression: "CallExpression",
+  ExpressionStatement: "ExpressionStatement"
 };
 function tokenizer(input) {
   let current = 0;
@@ -238,9 +239,37 @@ function transformer(ast) {
   return newAst;
 }
 
-function codeGenerator(node) {}
+function codeGenerator(node) {
+  switch (node.type) {
+    case nodeTypes.Program:
+      return node.body.map(codeGenerator).join("\n");
+    case nodeTypes.ExpressionStatement:
+      return codeGenerator(node.expression) + ";";
+    case nodeTypes.CallExpression:
+      return `${node.callee.name}(${node.arguments
+        .map(codeGenerator)
+        .join(",")})`;
+    case nodeTypes.StringLiteral:
+      return `"${node.value}"`;
+    case nodeTypes.NumberLiteral:
+      return node.value;
+    default:
+      throw new TypeError(node.type);
+  }
+}
 
-function compiler(input) {}
+// assert.deepEqual(tokenizer(input), tokens);
+// assert.deepEqual(parser(tokens), ast);
+// assert.deepEqual(transformer(ast), newAst);
+// assert.deepEqual(codeGenerator(newAst), output);
+
+function compiler(input) {
+  const tokens = tokenizer(input);
+  const ast = parser(tokens);
+  const newAst = transformer(ast);
+  const output = codeGenerator(newAst);
+  return output;
+}
 
 module.exports = {
   tokenizer,
